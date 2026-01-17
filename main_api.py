@@ -12,6 +12,7 @@ ELEFTHERIA_COORDS = (35.17022784728593, 33.35889554051766)
 S1_END_COORDS = (35.13160429484031, 33.299296813161504)
 S2_END_COORDS = (35.11338633948102, 33.33255319068168)
 S3_END_COORDS = (35.12984920055877, 33.36299761491542)
+S4_END_COORDS = (35.14966690544324, 33.41059674652208)
 
 def get_route(start, end):
     url = (
@@ -30,7 +31,7 @@ def get_route_from_stops(stops):
         route.extend(get_route(stops[i][1:], stops[i + 1][1:]))
     return route
 
-def bus_update_worker(interval_seconds=2):
+def bus_update_worker(interval_seconds=1.2):
     while True:
         for bus in buses_in_service:
             bus.move_next()
@@ -50,8 +51,7 @@ class Bus:
         def dist_sq(a, b):
             return (a[1] - b[1]) ** 2 + (a[2] - b[2]) ** 2
 
-        # 1. FIND BEST INSERTION POINT (Minimizing detour)
-        # We only look at stops from the 'next' one onwards to avoid going backwards
+        # find best insertion point
         min_increase = float("inf")
         insert_index = len(self.stops)
 
@@ -65,8 +65,7 @@ class Bus:
 
         self.stops.insert(insert_index, new_stop)
 
-        # 2. RECALCULATE FROM CURRENT POSITION (The "Teleport" Fix)
-        # Route from current lat/lon -> current target -> rest of the itinerary
+        # recalculate route from current position
         leg_to_target = get_route(self.pos, self.stops[self.next_stop_idx][1:])
         remaining_legs = get_route_from_stops(self.stops[self.next_stop_idx:])
 
@@ -115,7 +114,7 @@ def find_closest_bus(origin: Tuple[float, float], buses: List[Bus]) -> Bus:
     return closest_bus
 
 
-# --- API ---
+# API endpoints
 app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
@@ -176,5 +175,14 @@ def startup():
         ],
     )
     buses_in_service.append(bus_s3)
+
+    bus_s4 = Bus(
+        name="S4",
+        stops=[
+            ("Eleftheria", float(ELEFTHERIA_COORDS[0]), float(ELEFTHERIA_COORDS[1])),
+            ("S4 End", float(S4_END_COORDS[0]), float(S4_END_COORDS[1])),
+        ],
+    )
+    buses_in_service.append(bus_s4)
 
     threading.Thread(target=bus_update_worker, daemon=True).start()
