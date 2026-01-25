@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Tora for Nicosia</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background-color: #1e90ff;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-size: 24px;
+        }
+
+        #map {
+            width: 80%;      /* map width */
+            height: 500px;   /* map height */
+            margin: 20px auto; /* center horizontally */
+            border: 2px solid #1e90ff;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <header>Tora for Nicosia</header>
+
+    <div id="map"></div>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <script>
+        var map = L.map('map').setView([51.505, -0.09], 13);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+    
+        const busMarkers = {}; // store markers by bus name
+
+        async function fetchBusPositions() {
+            try {
+                const response = await fetch('http://127.0.0.1:8000/get_buses'); // your endpoint
+                const buses = await response.json();
+                return buses; // array of buses
+            } catch (err) {
+                console.error("Error fetching bus positions:", err);
+                return [];
+            }
+        }
+        
+
+        const busIcon = L.icon({
+            iconUrl: 'https://cdn-icons-png.flaticon.com/512/1068/1068632.png',
+            iconSize: [32, 32],
+            iconAnchor: [16, 16],
+            popupAnchor: [0, -16]
+        });
+
+        async function updateBuses() {
+            const buses = await fetchBusPositions();
+
+            buses.forEach(bus => {
+                const { name, pos } = bus;
+                const [lat, lon] = pos;
+
+                if (busMarkers[name]) {
+                    busMarkers[name].setLatLng([lat, lon]);
+                } else {
+                    const marker = L.marker([lat, lon], {icon:busIcon}).addTo(map)
+                                    .bindPopup(name);
+                    busMarkers[name] = marker;
+                }
+            });
+        }
+
+        // Initial call
+        updateBuses();
+
+        // Update every 5 seconds
+        setInterval(updateBuses, 5000);
+        
+    </script>
+</body>
+</html>
+
