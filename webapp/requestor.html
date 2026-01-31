@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Requestor App</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background-color: #808080ff;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-size: 24px;
+        }
+
+        #map {
+            width: 80%;
+            height: 500px;
+            margin: 20px auto;
+            border: 2px solid #808080ff;
+            border-radius: 10px;
+        }
+
+        button {
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <header>Request Bus - Tora for Nicosia</header>
+    <p id="statusfield"></p>
+    <div id="map"></div>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        // ----- MAP SETUP -----
+        var map = L.map('map').setView([35.185, 33.382], 13);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap'
+        }).addTo(map);
+
+        map.doubleClickZoom.disable();
+
+        const statusField = document.getElementById("statusfield");
+
+        // ----- STATES -----
+        const STATE_ORIGIN = "ORIGIN";
+        const STATE_DEST = "DESTINATION";
+        const STATE_READY = "READY";
+        const STATE_INFO = "INFO";
+
+        let state = STATE_ORIGIN;
+        let originMarker = null;
+        let destMarker = null;
+        let originLatLng = null;
+        let destLatLng = null;
+        let requestButton = null;
+        let busPollingInterval = null;
+        let busRouteLine = null;
+        let busMarker = null;
+
+        updateStatus();
+
+        // ----- MAP DOUBLE CLICK HANDLER -----
+        map.on("dblclick", function(e) {
+            if (state === STATE_ORIGIN) {
+                originLatLng = e.latlng;
+                originMarker = L.marker(originLatLng).addTo(map)
+                    .bindPopup("Origin")
+                    .openPopup();
+                state = STATE_DEST;
+                updateStatus();
+                return;
+            }
+
+            if (state === STATE_DEST) {
+                destLatLng = e.latlng;
+                destMarker = L.marker(destLatLng).addTo(map)
+                    .bindPopup("Destination")
+                    .openPopup();
+                state = STATE_READY;
+                updateStatus();
+                showRequestButton();
+                return;
+            }
+        });
+
+        // ----- SHOW REQUEST BUTTON -----
+        function showRequestButton() {
+            requestButton = document.createElement("button");
+            requestButton.innerText = "Request Ride";
+            requestButton.style.display = "block";
+            requestButton.style.margin = "10px auto";
+            requestButton.style.padding = "10px 20px";
+            requestButton.style.fontSize = "16px";
+
+            requestButton.onclick = requestRide;
+            document.body.insertBefore(requestButton, document.getElementById("map"));
+        }
+
+        // ----- REQUEST RIDE -----
+        async function requestRide() {
+            // remove origin/destination markers
+            if (originMarker) map.removeLayer(originMarker);
+            if (destMarker) map.removeLayer(destMarker);
+
+            originMarker = null;
+            destMarker = null;
+
+            if (requestButton) requestButton.remove();
+            requestButton = null;
+
+            state = STATE_INFO;
+            updateStatus("Requesting bus...");
+
+            const originStr = `${originLatLng.lat},${originLatLng.lng}`;
+            const destStr = `${destLatLng.lat},${destLatLng.lng}`;
+
+            try {
+                // Step 1: call request_transfer
+                const transferResp = await fetch(
+                    `http://127.0.0.1:8000/request_transfer?origin_str=${originStr}&dest_str=${destStr}`
+                );
+                const stopId = (await transferResp.text()).trim(); // e.g., "S4-21"
+                const busId = stopId.split("-")[0];                 // "S4"
+
+                statusField.innerText = `Bus ${busId} assigned. Tracking...`;
+
+                // Step 2: start polling get_buses every 3 seconds
+                if (busPollingInterval) clearInterval(busPollingInterval);
+                busPollingInterval = setInterval(() => pollBus(busId, stopId, originStr, destStr), 3000);
+
+            } catch (err) {
+                statusField.innerText = "Error requesting bus";
+                console.error(err);
+            }
+        }
+
+        // ----- POLL BUS INFO -----
+        async function pollBus(busId, stopId, origin, destination) {
+            try {
+                const busesResp = await fetch("http://127.0.0.1:8000/get_buses");
+                const buses = await busesResp.json();
+
+                const bus = buses.find(b => b.name === busId);
+                if (!bus) return;
+
+                // update status field
+                statusField.innerHTML = `
+                    <b>Bus:</b> ${bus.name}<br>
+                    <b>Pickup Stop:</b> ${stopId}<br>
+                    <b>Origin:</b> ${origin}<br>
+                    <b>Destination:</b> ${destination}<br>
+                    <b>Route points:</b> ${bus.route.length}<br>
+                    <b>Current Position:</b> ${bus.pos[0].toFixed(5)}, ${bus.pos[1].toFixed(5)}
+                `;
+
+                // remove old route/marker
+                if (busRouteLine) map.removeLayer(busRouteLine);
+                if (busMarker) map.removeLayer(busMarker);
+
+                // draw bus route
+                const latlngs = bus.route.map(pt => [pt[0], pt[1]]);
+                busRouteLine = L.polyline(latlngs, { color: 'blue' }).addTo(map);
+
+                // draw current bus position
+                busMarker = L.circleMarker(bus.pos, { radius: 7, color: 'red' }).addTo(map);
+
+            } catch (err) {
+                console.error("Error polling bus:", err);
+            }
+        }
+
+        // ----- UPDATE STATUS -----
+        function updateStatus(text=null) {
+            if (text) {
+                statusField.innerText = text;
+                return;
+            }
+            if (state === STATE_ORIGIN) statusField.innerText = "Double-click map to select origin";
+            else if (state === STATE_DEST) statusField.innerText = "Double-click map to select destination";
+            else if (state === STATE_READY) statusField.innerText = "Ready to request bus";
+            else if (state === STATE_INFO) statusField.innerText = "Bus requested. Waiting for info…";
+        }
+
+    </script>
+</body>
+</html>
+

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Tora for Nicosia</title>
+    <title>Dashboard</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -33,29 +33,34 @@
     </style>
 </head>
 <body>
-    <header>Tora for Nicosia</header>
-
+    <header>Dashboard - Tora for Nicosia</header>
+    <p id="statusfield"></p>
     <div id="map"></div>
 
     <!-- Leaflet JS -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
     <script>
-        var map = L.map('map').setView([51.505, -0.09], 13);
+        var map = L.map('map').setView([35.185, 33.382], 13);
+        
+        const statusField = document.getElementById("statusfield");
 
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; OpenStreetMap contributors'
         }).addTo(map);
     
         const busMarkers = {}; // store markers by bus name
-
+        const busRoutes = {};
+        
         async function fetchBusPositions() {
             try {
                 const response = await fetch('http://127.0.0.1:8000/get_buses'); // your endpoint
                 const buses = await response.json();
-                return buses; // array of buses
+                statusField.textContent = "Network status: Connected"
+                return buses; //array of buses
             } catch (err) {
                 console.error("Error fetching bus positions:", err);
+                statusField.textContent = "Network status: Disconnected"
                 return [];
             }
         }
@@ -72,18 +77,28 @@
             const buses = await fetchBusPositions();
 
             buses.forEach(bus => {
-                const { name, pos } = bus;
-                const [lat, lon] = pos;
+                const { name, pos, route } = bus;
 
+                // ----- marker -----
                 if (busMarkers[name]) {
-                    busMarkers[name].setLatLng([lat, lon]);
+                    busMarkers[name].setLatLng(pos);
                 } else {
-                    const marker = L.marker([lat, lon], {icon:busIcon}).addTo(map)
-                                    .bindPopup(name);
-                    busMarkers[name] = marker;
+                    busMarkers[name] = L.marker(pos, { icon: busIcon })
+                    .addTo(map)
+                    .bindPopup(name);
+                }
+
+                // ----- route -----
+                if (route && route.length > 1) {
+                    if (busRoutes[name]) {
+                       busRoutes[name].setLatLngs(route);
+                    } else {
+                        busRoutes[name] = L.polyline(route).addTo(map);
+                    }
                 }
             });
         }
+
 
         // Initial call
         updateBuses();
