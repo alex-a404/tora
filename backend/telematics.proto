@@ -1,0 +1,41 @@
+syntax = "proto3";
+package telematics;
+
+option go_package = "github.com/alex-a404/tora/backend/gen/telematics;telematics";
+
+service Telematics {
+  rpc GetBuses(GetBusReq) returns (stream Bus) {}
+  rpc DivertBus(DivertBusReq) returns (Confirmation) {}
+}
+
+message GetBusReq {
+  string buses =1;
+}
+
+message Buses {
+  repeated Bus buses = 1;
+}
+
+message DivertBusReq{
+  string busID = 1;
+  Coords from = 2;
+  Coords to = 3;
+}
+
+message Confirmation{}
+
+message Bus{
+  string name = 1;
+  repeated Coords route = 2;
+  repeated Stop stops = 3;
+}
+
+message Stop{
+  Coords coords = 1;
+  string name =2;
+}
+
+message Coords{
+  float lat = 1;
+  float lon = 2;
+}
