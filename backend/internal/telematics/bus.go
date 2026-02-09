@@ -11,15 +11,15 @@ type Coordinates struct {
 }
 
 type Stop struct {
-	name   string
-	coords Coordinates
+	Name   string
+	Coords Coordinates
 }
 
 type Bus struct {
-	name  string
-	stops []Stop
-	pos   Coordinates
-	route []Coordinates
+	Name  string        `json:"name"`
+	Stops []Stop        `json:"stops"`
+	Pos   Coordinates   `json:"pos"`
+	Route []Coordinates `json:"route"`
 }
 
 func NewBus(name string, pos string) *Bus {
@@ -29,8 +29,8 @@ func NewBus(name string, pos string) *Bus {
 	lon, _ := strconv.ParseFloat(parts[1], 64)
 
 	return &Bus{
-		name: name,
-		pos: Coordinates{
+		Name: name,
+		Pos: Coordinates{
 			Lat: lat,
 			Lon: lon,
 		},

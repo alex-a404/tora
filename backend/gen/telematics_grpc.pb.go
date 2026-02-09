@@ -4,7 +4,7 @@
 // - protoc             v3.12.4
 // source: telematics.proto
 
-package telematics
+package telematicspb
 
 import (
 	context "context"
@@ -19,8 +19,8 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	Telematics_GetBuses_FullMethodName  = "/telematics.Telematics/GetBuses"
-	Telematics_DivertBus_FullMethodName = "/telematics.Telematics/DivertBus"
+	Telematics_GetBuses_FullMethodName  = "/telematicspb.Telematics/GetBuses"
+	Telematics_DivertBus_FullMethodName = "/telematicspb.Telematics/DivertBus"
 )
 
 // TelematicsClient is the client API for Telematics service.
@@ -144,7 +144,7 @@ func _Telematics_DivertBus_Handler(srv interface{}, ctx context.Context, dec fun
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var Telematics_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "telematics.Telematics",
+	ServiceName: "telematicspb.Telematics",
 	HandlerType: (*TelematicsServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{

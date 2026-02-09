@@ -170,11 +170,11 @@
                 if (busRouteLine) map.removeLayer(busRouteLine);
                 if (busMarker) map.removeLayer(busMarker);
 
-                // draw bus route
+                // draw telematics route
                 const latlngs = bus.route.map(pt => [pt[0], pt[1]]);
                 busRouteLine = L.polyline(latlngs, { color: 'blue' }).addTo(map);
 
-                // draw current bus position
+                // draw current telematics position
                 busMarker = L.circleMarker(bus.pos, { radius: 7, color: 'red' }).addTo(map);
 
             } catch (err) {

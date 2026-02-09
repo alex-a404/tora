@@ -4,7 +4,7 @@
 // 	protoc        v3.12.4
 // source: telematics.proto
 
-package telematics
+package telematicspb
 
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
@@ -373,31 +373,30 @@ var File_telematics_proto protoreflect.FileDescriptor
 
 const file_telematics_proto_rawDesc = "" +
 	"\n" +
-	"\x10telematics.proto\x12\n" +
-	"telematics\"!\n" +
+	"\x10telematics.proto\x12\ftelematicspb\"!\n" +
 	"\tGetBusReq\x12\x14\n" +
-	"\x05buses\x18\x01 \x01(\tR\x05buses\".\n" +
-	"\x05Buses\x12%\n" +
-	"\x05buses\x18\x01 \x03(\v2\x0f.telematics.BusR\x05buses\"p\n" +
+	"\x05buses\x18\x01 \x01(\tR\x05buses\"0\n" +
+	"\x05Buses\x12'\n" +
+	"\x05buses\x18\x01 \x03(\v2\x11.telematicspb.BusR\x05buses\"t\n" +
 	"\fDivertBusReq\x12\x14\n" +
-	"\x05busID\x18\x01 \x01(\tR\x05busID\x12&\n" +
-	"\x04from\x18\x02 \x01(\v2\x12.telematics.CoordsR\x04from\x12\"\n" +
-	"\x02to\x18\x03 \x01(\v2\x12.telematics.CoordsR\x02to\"\x0e\n" +
-	"\fConfirmation\"k\n" +
+	"\x05busID\x18\x01 \x01(\tR\x05busID\x12(\n" +
+	"\x04from\x18\x02 \x01(\v2\x14.telematicspb.CoordsR\x04from\x12$\n" +
+	"\x02to\x18\x03 \x01(\v2\x14.telematicspb.CoordsR\x02to\"\x0e\n" +
+	"\fConfirmation\"o\n" +
 	"\x03Bus\x12\x12\n" +
-	"\x04name\x18\x01 \x01(\tR\x04name\x12(\n" +
-	"\x05route\x18\x02 \x03(\v2\x12.telematics.CoordsR\x05route\x12&\n" +
-	"\x05stops\x18\x03 \x03(\v2\x10.telematics.StopR\x05stops\"F\n" +
-	"\x04Stop\x12*\n" +
-	"\x06coords\x18\x01 \x01(\v2\x12.telematics.CoordsR\x06coords\x12\x12\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x12*\n" +
+	"\x05route\x18\x02 \x03(\v2\x14.telematicspb.CoordsR\x05route\x12(\n" +
+	"\x05stops\x18\x03 \x03(\v2\x12.telematicspb.StopR\x05stops\"H\n" +
+	"\x04Stop\x12,\n" +
+	"\x06coords\x18\x01 \x01(\v2\x14.telematicspb.CoordsR\x06coords\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\",\n" +
 	"\x06Coords\x12\x10\n" +
 	"\x03lat\x18\x01 \x01(\x02R\x03lat\x12\x10\n" +
-	"\x03lon\x18\x02 \x01(\x02R\x03lon2\x87\x01\n" +
+	"\x03lon\x18\x02 \x01(\x02R\x03lon2\x8f\x01\n" +
 	"\n" +
-	"Telematics\x126\n" +
-	"\bGetBuses\x12\x15.telematics.GetBusReq\x1a\x0f.telematics.Bus\"\x000\x01\x12A\n" +
-	"\tDivertBus\x12\x18.telematics.DivertBusReq\x1a\x18.telematics.Confirmation\"\x00B=Z;github.com/alex-a404/tora/backend/gen/telematics;telematicsb\x06proto3"
+	"Telematics\x12:\n" +
+	"\bGetBuses\x12\x17.telematicspb.GetBusReq\x1a\x11.telematicspb.Bus\"\x000\x01\x12E\n" +
+	"\tDivertBus\x12\x1a.telematicspb.DivertBusReq\x1a\x1a.telematicspb.Confirmation\"\x00BAZ?github.com/alex-a404/tora/backend/gen/telematicspb;telematicspbb\x06proto3"
 
 var (
 	file_telematics_proto_rawDescOnce sync.Once
@@ -413,25 +412,25 @@ func file_telematics_proto_rawDescGZIP() []byte {
 
 var file_telematics_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
 var file_telematics_proto_goTypes = []any{
-	(*GetBusReq)(nil),    // 0: telematics.GetBusReq
-	(*Buses)(nil),        // 1: telematics.Buses
-	(*DivertBusReq)(nil), // 2: telematics.DivertBusReq
-	(*Confirmation)(nil), // 3: telematics.Confirmation
-	(*Bus)(nil),          // 4: telematics.Bus
-	(*Stop)(nil),         // 5: telematics.Stop
-	(*Coords)(nil),       // 6: telematics.Coords
+	(*GetBusReq)(nil),    // 0: telematicspb.GetBusReq
+	(*Buses)(nil),        // 1: telematicspb.Buses
+	(*DivertBusReq)(nil), // 2: telematicspb.DivertBusReq
+	(*Confirmation)(nil), // 3: telematicspb.Confirmation
+	(*Bus)(nil),          // 4: telematicspb.Bus
+	(*Stop)(nil),         // 5: telematicspb.Stop
+	(*Coords)(nil),       // 6: telematicspb.Coords
 }
 var file_telematics_proto_depIdxs = []int32{
-	4, // 0: telematics.Buses.buses:type_name -> telematics.Bus
-	6, // 1: telematics.DivertBusReq.from:type_name -> telematics.Coords
-	6, // 2: telematics.DivertBusReq.to:type_name -> telematics.Coords
-	6, // 3: telematics.Bus.route:type_name -> telematics.Coords
-	5, // 4: telematics.Bus.stops:type_name -> telematics.Stop
-	6, // 5: telematics.Stop.coords:type_name -> telematics.Coords
-	0, // 6: telematics.Telematics.GetBuses:input_type -> telematics.GetBusReq
-	2, // 7: telematics.Telematics.DivertBus:input_type -> telematics.DivertBusReq
-	4, // 8: telematics.Telematics.GetBuses:output_type -> telematics.Bus
-	3, // 9: telematics.Telematics.DivertBus:output_type -> telematics.Confirmation
+	4, // 0: telematicspb.Buses.buses:type_name -> telematicspb.Bus
+	6, // 1: telematicspb.DivertBusReq.from:type_name -> telematicspb.Coords
+	6, // 2: telematicspb.DivertBusReq.to:type_name -> telematicspb.Coords
+	6, // 3: telematicspb.Bus.route:type_name -> telematicspb.Coords
+	5, // 4: telematicspb.Bus.stops:type_name -> telematicspb.Stop
+	6, // 5: telematicspb.Stop.coords:type_name -> telematicspb.Coords
+	0, // 6: telematicspb.Telematics.GetBuses:input_type -> telematicspb.GetBusReq
+	2, // 7: telematicspb.Telematics.DivertBus:input_type -> telematicspb.DivertBusReq
+	4, // 8: telematicspb.Telematics.GetBuses:output_type -> telematicspb.Bus
+	3, // 9: telematicspb.Telematics.DivertBus:output_type -> telematicspb.Confirmation
 	8, // [8:10] is the sub-list for method output_type
 	6, // [6:8] is the sub-list for method input_type
 	6, // [6:6] is the sub-list for extension type_name

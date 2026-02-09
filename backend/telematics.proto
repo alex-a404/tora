@@ -1,7 +1,7 @@
 syntax = "proto3";
-package telematics;
+package telematicspb;
 
-option go_package = "github.com/alex-a404/tora/backend/gen/telematics;telematics";
+option go_package = "github.com/alex-a404/tora/backend/gen/telematicspb;telematicspb";
 
 service Telematics {
   rpc GetBuses(GetBusReq) returns (stream Bus) {}
