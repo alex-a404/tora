@@ -1,6 +1,9 @@
 package main
 
 import (
+	"fmt"
+	"log"
+	"time"
 	"tora/backend/internal/telematics"
 
 	"github.com/gin-gonic/gin"
@@ -12,54 +15,63 @@ var (
 
 func routeSetup() {
 	// setup buses
-	busS1 := telematics.Bus{
-		Name: "S1",
-		Pos:  EleftheriaCoords,
-		Stops: []telematics.Stop{
+	busS1, err := telematics.NewBus(
+		"S1",
+		[]telematics.Stop{
 			EleftheriaStop,
 			S1EndStop,
 		},
-		Route: S1InitialRoute,
+		EleftheriaCoords,
+	)
+	if err != nil {
+		log.Fatal(err)
 	}
 
-	busS2 := telematics.Bus{
-		Name: "S2",
-		Pos:  EleftheriaCoords,
-		Stops: []telematics.Stop{
+	busS2, err := telematics.NewBus(
+		"S2",
+		[]telematics.Stop{
 			EleftheriaStop,
 			S2EndStop,
 		},
-		Route: S2InitialRoute,
+		EleftheriaCoords,
+	)
+	if err != nil {
+		log.Fatal(err)
 	}
 
-	busS3 := telematics.Bus{
-		Name: "S3",
-		Pos:  EleftheriaCoords,
-		Stops: []telematics.Stop{
+	busS3, err := telematics.NewBus(
+		"S3",
+		[]telematics.Stop{
 			EleftheriaStop,
 			S3EndStop,
 		},
-		Route: S3InitialRoute,
+		EleftheriaCoords,
+	)
+	if err != nil {
+		log.Fatal(err)
 	}
 
-	busS4 := telematics.Bus{
-		Name: "S4",
-		Pos:  EleftheriaCoords,
-		Stops: []telematics.Stop{
+	busS4, err := telematics.NewBus(
+		"S4",
+		[]telematics.Stop{
 			EleftheriaStop,
-			S1EndStop,
+			S4EndStop,
 		},
-		Route: S4InitialRoute,
+		EleftheriaCoords,
+	)
+	if err != nil {
+		log.Fatal(err)
 	}
 
 	m = telematics.Manager{
-		Buses: []telematics.Bus{busS1, busS2, busS3, busS4},
+		Buses: []telematics.Bus{*busS1, *busS2, *busS3, *busS4},
 	}
 }
 
 func main() {
 
 	routeSetup()
+	go updateWorker()
 
 	r := gin.Default()
 	r.GET("/get_buses", func(c *gin.Context) {
@@ -74,3 +86,10 @@ func main() {
 }
 
 func requestTransfer(c *gin.Context) {}
+func updateWorker() {
+	for {
+		fmt.Println("updateWorker")
+		m.UpdateAll()
+		time.Sleep(time.Second)
+	}
+}
