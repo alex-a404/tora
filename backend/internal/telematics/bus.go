@@ -1,10 +1,5 @@
 package telematics
 
-import (
-	"strconv"
-	"strings"
-)
-
 type Coordinates struct {
 	Lat float64
 	Lon float64
@@ -22,17 +17,34 @@ type Bus struct {
 	Route []Coordinates `json:"route"`
 }
 
-func NewBus(name string, pos string) *Bus {
-	// parse initial coords of bus
-	parts := strings.Split(pos, ",")
-	lat, _ := strconv.ParseFloat(parts[0], 64)
-	lon, _ := strconv.ParseFloat(parts[1], 64)
-
-	return &Bus{
-		Name: name,
-		Pos: Coordinates{
-			Lat: lat,
-			Lon: lon,
-		},
+func NewBus(name string, stops []Stop, pos Coordinates) (*Bus, error) {
+	b := &Bus{
+		Name:  name,
+		Stops: stops,
+		Pos:   pos,
 	}
+
+	// calculate initial route
+	if err := b.CalculateRoute(); err != nil {
+		return nil, err
+	}
+
+	return b, nil
+}
+
+func (b *Bus) CalculateRoute() error {
+	route, err := getRouteFromStops(b.Stops)
+	if err != nil {
+		return err
+	}
+	b.Route = route
+	return nil
+}
+
+func (b *Bus) Update() {
+	if len(b.Route) == 0 {
+		return
+	}
+	b.Pos = b.Route[0]
+	b.Route = b.Route[1:]
 }

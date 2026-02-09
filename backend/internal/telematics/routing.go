@@ -54,17 +54,21 @@ func getRoute(start, end []float64) ([]Coordinates, error) {
 	return result, nil
 }
 
-func getRouteFromStops(stops [][]float64) ([]Coordinates, error) {
+func getRouteFromStops(stops []Stop) ([]Coordinates, error) {
 	var route []Coordinates
 
 	for i := 0; i < len(stops)-1; i++ {
+		from := stops[i].Coords
+		to := stops[i+1].Coords
+
 		segment, err := getRoute(
-			stops[i][1:],   // lat, lon
-			stops[i+1][1:], // lat, lon
+			[]float64{from.Lat, from.Lon},
+			[]float64{to.Lat, to.Lon},
 		)
 		if err != nil {
 			return nil, err
 		}
+
 		route = append(route, segment...)
 	}
 

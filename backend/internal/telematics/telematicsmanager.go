@@ -7,3 +7,9 @@ type Manager struct {
 func (m *Manager) GetBuses() []Bus {
 	return m.Buses
 }
+
+func (m *Manager) UpdateAll() {
+	for i := range m.Buses {
+		m.Buses[i].Update()
+	}
+}
