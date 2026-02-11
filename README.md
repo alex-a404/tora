@@ -1,9 +1,8 @@
 # Tora
 Demand-responsive transit services project (Cyprus Transport Hackathon).
 
-## Architecture on this branch:
+## Overview:
+This project consists of a backend witten in Go with REST endpoints for the frontend (HTML/JS). It aims to reduce the amount of empty 
+buses driving around the city at night, and to direct them where there is demand.
 
-Frontend dashboard app (HTML/JS) <-->(via REST) Python backend-for-frontend <-->(via gRPC) Go backend (Telematics service)
 
-
-Frontend bus request app (HTML/JS) <-->(via REST) Python backend-for-frontend <-->(via gRPC) Go backend (Tracking service)
