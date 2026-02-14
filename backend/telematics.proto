@@ -1,9 +1,9 @@
 syntax = "proto3";
-package telematicspb;
+package optimization;
 
-option go_package = "github.com/alex-a404/tora/backend/gen/telematicspb;telematicspb";
+option go_package = "github.com/alex-a404/tora/backend/gen/optimization;optimization";
 
-service Telematics {
+service Optimization {
   rpc GetBuses(GetBusReq) returns (stream Bus) {}
   rpc DivertBus(DivertBusReq) returns (Confirmation) {}
 }
@@ -17,9 +17,10 @@ message Buses {
 }
 
 message DivertBusReq{
-  string busID = 1;
-  Coords from = 2;
-  Coords to = 3;
+  int32 id =1;
+  string busID = 2;
+  Coords from = 3;
+  Coords to = 4;
 }
 
 message Confirmation{}

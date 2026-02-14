@@ -3,6 +3,7 @@ package telematics
 import (
 	"encoding/json"
 	"fmt"
+	"math"
 	"net/http"
 
 	"github.com/twpayne/go-polyline"
@@ -73,4 +74,68 @@ func getRouteFromStops(stops []Stop) ([]Coordinates, error) {
 	}
 
 	return route, nil
+}
+
+// helper methods for stop locating
+const earthRadius = 6371000 // meters
+
+func haversine(a, b Coordinates) float64 {
+	lat1 := a.Lat * math.Pi / 180
+	lon1 := a.Lon * math.Pi / 180
+	lat2 := b.Lat * math.Pi / 180
+	lon2 := b.Lon * math.Pi / 180
+
+	dLat := lat2 - lat1
+	dLon := lon2 - lon1
+
+	sinLat := math.Sin(dLat / 2)
+	sinLon := math.Sin(dLon / 2)
+
+	h := sinLat*sinLat +
+		math.Cos(lat1)*math.Cos(lat2)*sinLon*sinLon
+
+	return 2 * earthRadius * math.Asin(math.Sqrt(h))
+}
+
+func FindNearestStop(
+	point Coordinates,
+	stops []Stop,
+	maxDistance float64, // meters
+) (int, bool) {
+
+	bestDist := math.MaxFloat64
+	bestID := -1
+
+	for _, stop := range stops {
+		d := haversine(point, stop.Coords)
+
+		if d < bestDist {
+			bestDist = d
+			bestID = stop.Id
+		}
+	}
+
+	if bestDist > maxDistance {
+		return -1, false
+	}
+
+	return bestID, true
+}
+
+func distanceMeters(a, b Coordinates) float64 {
+	const R = 6371000 // Earth radius in meters
+
+	lat1 := a.Lat * math.Pi / 180
+	lon1 := a.Lon * math.Pi / 180
+	lat2 := b.Lat * math.Pi / 180
+	lon2 := b.Lon * math.Pi / 180
+
+	dlat := lat2 - lat1
+	dlon := lon2 - lon1
+
+	h := math.Sin(dlat/2)*math.Sin(dlat/2) +
+		math.Cos(lat1)*math.Cos(lat2)*
+			math.Sin(dlon/2)*math.Sin(dlon/2)
+
+	return 2 * R * math.Asin(math.Sqrt(h))
 }
