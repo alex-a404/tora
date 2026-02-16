@@ -8,7 +8,7 @@ type Coordinates struct {
 type Stop struct {
 	Name   string `json:"name"`
 	Coords Coordinates
-	Id     int `json:"id"`
+	Id     int32 `json:"id"`
 }
 
 // RouteDependency a rule that stop From should come before stop To in an itinerary
