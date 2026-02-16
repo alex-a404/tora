@@ -3,6 +3,7 @@ package processing
 import (
 	"math"
 	"tora/backend/internal/telematics"
+	"tora/backend/internal/tracker"
 )
 
 type UserRequest struct {
@@ -18,7 +19,10 @@ func NewUserRequest(fromCoords, toCoords telematics.Coordinates) UserRequest {
 }
 
 // ProcessReq interacts with python data abstraction layer
-func (req UserRequest) ProcessReq(stops []telematics.Stop, mgr telematics.Manager) UserResponse {
+func (req UserRequest) ProcessReq(stops []telematics.Stop,
+	mgr telematics.Manager,
+	trs tracker.TrackingService) UserResponse {
+
 	// determine FROM stop_id and TO stop_id
 	fromID, ok := telematics.FindNearestStop(req.FromCoords, stops, 300)
 	if !ok {
@@ -36,6 +40,8 @@ func (req UserRequest) ProcessReq(stops []telematics.Stop, mgr telematics.Manage
 
 	// TODO find closest bus to FROM
 	bus := mgr.GetBuses()[0]
+
+	transfers := bus.Dependencies
 
 	return UserResponse{}
 }

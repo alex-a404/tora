@@ -11,26 +11,27 @@ type Stop struct {
 	Id     int `json:"id"`
 }
 
-type Transfer struct {
+// RouteDependency a rule that stop From should come before stop To in an itinerary
+type RouteDependency struct {
 	From       Stop
 	To         Stop
 	InProgress bool
 }
 
 type Bus struct {
-	Name      string        `json:"name"`
-	Stops     []Stop        `json:"stops"`
-	Pos       Coordinates   `json:"pos"`
-	Route     []Coordinates `json:"route"`
-	Transfers []Transfer
+	Name         string        `json:"name"`
+	Itinerary    []Stop        `json:"itinerary"`
+	Pos          Coordinates   `json:"pos"`
+	Route        []Coordinates `json:"route"`
+	Dependencies []RouteDependency
 }
 
-func NewBus(name string, initialTransfers Transfer, pos Coordinates) (*Bus, error) {
+func NewBus(name string, initialTransfers RouteDependency, pos Coordinates) (*Bus, error) {
 
 	b := &Bus{
-		Name:  name,
-		Stops: []Stop{initialTransfers.From, initialTransfers.To},
-		Pos:   pos,
+		Name:      name,
+		Itinerary: []Stop{initialTransfers.From, initialTransfers.To},
+		Pos:       pos,
 	}
 
 	// calculate initial route
@@ -49,7 +50,7 @@ func (b *Bus) Redirect(from int, to int) error {
 }
 
 func (b *Bus) CalculateRoute() error {
-	route, err := getRouteFromStops(b.Stops)
+	route, err := getRouteFromStops(b.Itinerary)
 	if err != nil {
 		return err
 	}
@@ -66,8 +67,8 @@ func (b *Bus) Update() {
 	b.Route = b.Route[1:]
 
 	const threshold = 5.0
-	newTransfers := make([]Transfer, 0, len(b.Transfers))
-	for _, t := range b.Transfers {
+	newTransfers := make([]RouteDependency, 0, len(b.Dependencies))
+	for _, t := range b.Dependencies {
 		// Check if we are near pickup stop
 		if !t.InProgress &&
 			distanceMeters(b.Pos, t.From.Coords) <= threshold {
@@ -79,10 +80,10 @@ func (b *Bus) Update() {
 		if t.InProgress &&
 			distanceMeters(b.Pos, t.To.Coords) <= threshold {
 
-			// Drop completed → do NOT add to newTransfers
+			// Drop completed, do not add to newTransfers
 			continue
 		}
 		newTransfers = append(newTransfers, t)
 	}
-	b.Transfers = newTransfers
+	b.Dependencies = newTransfers
 }

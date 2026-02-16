@@ -1,0 +1,24 @@
+syntax = "proto3";
+package optimization;
+
+option go_package = "github.com/alex-a404/tora/backend/gen;optimization";
+
+service Optimization {
+  rpc RouteOptimize(OptimizeRequest) returns (OptimizedRoute);
+}
+
+message OptimizeRequest {
+  repeated int32 itinerary = 1;
+  repeated RouteDependency constraints = 2;
+  int32 direction = 3;
+}
+
+message OptimizedRoute {
+  repeated int32 stops = 1;
+  bool success = 2;
+}
+
+message RouteDependency {
+  int32 From = 1;
+  int32 To = 2;
+}

@@ -96,4 +96,5 @@ Desktop.ini
 # Linux
 *~
 
-/routing/routing_test.py
+/routing/optimize_functions.py
+/data/

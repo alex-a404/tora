@@ -17,9 +17,10 @@ func routeSetup() {
 	// setup buses
 	busS1, err := telematics.NewBus(
 		"S1",
-		[]telematics.Stop{
-			EleftheriaStop,
-			S1EndStop,
+		telematics.RouteDependency{
+			From:       EleftheriaStop,
+			To:         S1EndStop,
+			InProgress: true,
 		},
 		EleftheriaCoords,
 	)
@@ -29,9 +30,10 @@ func routeSetup() {
 
 	busS2, err := telematics.NewBus(
 		"S2",
-		[]telematics.Stop{
-			EleftheriaStop,
-			S2EndStop,
+		telematics.RouteDependency{
+			From:       EleftheriaStop,
+			To:         S2EndStop,
+			InProgress: true,
 		},
 		EleftheriaCoords,
 	)
@@ -41,9 +43,10 @@ func routeSetup() {
 
 	busS3, err := telematics.NewBus(
 		"S3",
-		[]telematics.Stop{
-			EleftheriaStop,
-			S3EndStop,
+		telematics.RouteDependency{
+			From:       EleftheriaStop,
+			To:         S3EndStop,
+			InProgress: true,
 		},
 		EleftheriaCoords,
 	)
@@ -53,9 +56,10 @@ func routeSetup() {
 
 	busS4, err := telematics.NewBus(
 		"S4",
-		[]telematics.Stop{
-			EleftheriaStop,
-			S4EndStop,
+		telematics.RouteDependency{
+			From:       EleftheriaStop,
+			To:         S4EndStop,
+			InProgress: true,
 		},
 		EleftheriaCoords,
 	)
