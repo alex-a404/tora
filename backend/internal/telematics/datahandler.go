@@ -22,22 +22,22 @@ func FindNearestStop(
 ) (*Stop, bool) {
 
 	bestDist := math.MaxFloat64
-	bestID := -1
+	var bestStop *Stop
 
 	for _, stop := range stops {
 		d := haversine(point, stop.Coords)
 
 		if d < bestDist {
 			bestDist = d
-			bestID = int(stop.Id)
+			bestStop = &stop
 		}
 	}
 
 	if bestDist > maxDistance {
-		return -1, false
+		return nil, false
 	}
 
-	return bestID, true
+	return bestStop, true
 }
 
 func NewStopManifest_FromYaml(yaml []byte) (*StopManifest, error) {

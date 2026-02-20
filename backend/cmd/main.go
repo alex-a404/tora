@@ -1,8 +1,8 @@
 package main
 
 import (
-	"fmt"
 	"log"
+	"strconv"
 	"time"
 	"tora/backend/internal/telematics"
 	"tora/backend/internal/tracker"
@@ -85,6 +85,20 @@ func main() {
 		buses := mgr.GetBuses()
 		c.JSON(200, buses)
 	})
+	r.GET("/get_session", func(c *gin.Context) {
+		if trackingId, ok := c.Params.Get("session_id"); ok {
+			// convert trackingid to int
+			trackingIdInt, err := strconv.Atoi(trackingId)
+			if err != nil {
+				c.JSON(200, "server error session_id not string")
+				return
+			}
+			c.JSON(200, trs.GetResponse(trackingIdInt))
+		} else {
+			c.JSON(404, "server error session_id not found")
+		}
+	})
+
 	err := r.Run(":8000")
 	if err != nil {
 		return
@@ -94,9 +108,7 @@ func main() {
 
 func updateWorker() {
 	for {
-		fmt.Println("updateWorker")
 		mgr.UpdateAll()
-		trs.UpdateAll()
 		time.Sleep(time.Second)
 	}
 }
