@@ -24,17 +24,18 @@ func NewUserRequest(fromCoords, toCoords telematics.Coordinates) UserRequest {
 }
 
 // ProcessReq interacts with python data abstraction layer
-func (req UserRequest) ProcessReq(stops []telematics.Stop,
+func (req UserRequest) ProcessReq(
 	mgr telematics.Manager,
+	sm telematics.StopManifest,
 	trs tracker.TrackingService) UserResponse {
 
 	// determine FROM stop_id and TO stop_id
-	fromID, ok := telematics.FindNearestStop(req.FromCoords, stops, 300)
+	fromStop, ok := telematics.FindNearestStop(req.FromCoords, sm.Stops, 300)
 	if !ok {
 		return fail("Server-side error (finding closest stop FROM)")
 	}
 
-	toID, ok := telematics.FindNearestStop(req.ToCoords, stops, 300)
+	toStop, ok := telematics.FindNearestStop(req.ToCoords, sm.Stops, 300)
 	if !ok {
 		return fail("Server-side error (finding closest stop TO)")
 	}
@@ -61,6 +62,9 @@ func (req UserRequest) ProcessReq(stops []telematics.Stop,
 		itineraryList = append(itineraryList, stop.Id)
 	}
 
+	// add current request to itinerary
+	itineraryList = append(itineraryList, fromStop.Id, toStop.Id)
+
 	var constraintList []*pb.RouteDependency
 	for _, constraint := range bus.Dependencies {
 		dep := &pb.RouteDependency{
@@ -70,19 +74,48 @@ func (req UserRequest) ProcessReq(stops []telematics.Stop,
 		constraintList = append(constraintList, dep)
 	}
 
-	resp, err := client.RouteOptimize(ctx, &pb.OptimizeRequest{
+	// add constraints of current request
+	constraintList = append(constraintList, &pb.RouteDependency{
+		From: fromStop.Id,
+		To:   toStop.Id,
+	})
+
+	optimizeResp, err := client.RouteOptimize(ctx, &pb.OptimizeRequest{
 		Itinerary:   itineraryList,
 		Constraints: constraintList,
 		Direction:   1,
 	})
+	if err != nil {
+		return fail("Server-side error (optimizing route gRPC call)")
+	}
 
-	return UserResponse{}
+	var newItinerary []telematics.Stop
+	for _, stopId := range optimizeResp.Stops {
+		if newStop, ok := sm.GetStopFromId(stopId); ok {
+			newItinerary = append(newItinerary, *newStop)
+		}
+	}
+
+	err = bus.NewItinerary(newItinerary)
+	if err != nil {
+		return fail("Server-side error (update bus itinerary+reroute)")
+	}
+
+	// todo init and register tracking session
+
+	return UserResponse{
+		Ok:         true,
+		FromStopId: int(fromStop.Id),
+		ToStopId:   int(toStop.Id),
+		Message:    "OK",
+		TrackingID: 0,
+	}
 }
 
 type UserResponse struct {
 	Ok         bool
-	FromStop   telematics.Stop
-	ToStop     telematics.Stop
+	FromStopId int
+	ToStopId   int
 	Message    string
 	TrackingID int
 }
@@ -90,8 +123,8 @@ type UserResponse struct {
 func fail(msg string) UserResponse {
 	return UserResponse{
 		false,
-		telematics.Stop{},
-		telematics.Stop{},
+		0,
+		0,
 		msg,
 		0,
 	}

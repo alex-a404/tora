@@ -97,31 +97,6 @@ func haversine(a, b Coordinates) float64 {
 	return 2 * earthRadius * math.Asin(math.Sqrt(h))
 }
 
-func FindNearestStop(
-	point Coordinates,
-	stops []Stop,
-	maxDistance float64, // meters
-) (int, bool) {
-
-	bestDist := math.MaxFloat64
-	bestID := -1
-
-	for _, stop := range stops {
-		d := haversine(point, stop.Coords)
-
-		if d < bestDist {
-			bestDist = d
-			bestID = stop.Id
-		}
-	}
-
-	if bestDist > maxDistance {
-		return -1, false
-	}
-
-	return bestID, true
-}
-
 func distanceMeters(a, b Coordinates) float64 {
 	const R = 6371000 // Earth radius in meters
 

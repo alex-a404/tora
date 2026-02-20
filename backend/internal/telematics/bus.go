@@ -41,7 +41,8 @@ func NewBus(name string, initialTransfers RouteDependency, pos Coordinates) (*Bu
 	return b, nil
 }
 
-func (b *Bus) Redirect(from int, to int) error {
+func (b *Bus) NewItinerary(itinerary []Stop) error {
+	b.Itinerary = itinerary
 	err := b.CalculateRoute()
 	if err != nil {
 		return err
@@ -76,7 +77,7 @@ func (b *Bus) Update() {
 			t.InProgress = true
 		}
 
-		// Check if we are near dropoff stop AND transfer active
+		// Check if we are near drop off stop AND transfer active
 		if t.InProgress &&
 			distanceMeters(b.Pos, t.To.Coords) <= threshold {
 

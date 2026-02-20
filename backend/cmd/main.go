@@ -5,12 +5,15 @@ import (
 	"log"
 	"time"
 	"tora/backend/internal/telematics"
+	"tora/backend/internal/tracker"
 
 	"github.com/gin-gonic/gin"
 )
 
 var (
-	m telematics.Manager
+	mgr telematics.Manager
+	sm  telematics.StopManifest
+	trs tracker.TrackingService
 )
 
 func routeSetup() {
@@ -67,7 +70,7 @@ func routeSetup() {
 		log.Fatal(err)
 	}
 
-	m = telematics.Manager{
+	mgr = telematics.Manager{
 		Buses: []telematics.Bus{*busS1, *busS2, *busS3, *busS4},
 	}
 }
@@ -79,7 +82,7 @@ func main() {
 
 	r := gin.Default()
 	r.GET("/get_buses", func(c *gin.Context) {
-		buses := m.GetBuses()
+		buses := mgr.GetBuses()
 		c.JSON(200, buses)
 	})
 	err := r.Run(":8000")
@@ -89,11 +92,11 @@ func main() {
 
 }
 
-func requestTransfer(c *gin.Context) {}
 func updateWorker() {
 	for {
 		fmt.Println("updateWorker")
-		m.UpdateAll()
+		mgr.UpdateAll()
+		trs.UpdateAll()
 		time.Sleep(time.Second)
 	}
 }
