@@ -5,15 +5,12 @@ import (
 	"time"
 	"tora/backend/internal/processing"
 	"tora/backend/internal/telematics"
-	"tora/backend/internal/tracker"
 
 	"github.com/gin-gonic/gin"
 )
 
 var (
-	mgr telematics.Manager
-	sm  telematics.StopManifest
-	trs tracker.TrackingService
+	s processing.Service
 )
 
 func routeSetup() {
@@ -70,7 +67,7 @@ func routeSetup() {
 		log.Fatal(err)
 	}
 
-	mgr = telematics.Manager{
+	s.TelematicsMgr = telematics.Manager{
 		Buses: []telematics.Bus{*busS1, *busS2, *busS3, *busS4},
 	}
 }
@@ -82,38 +79,33 @@ func main() {
 
 	r := gin.Default()
 	r.GET("/get_buses", func(c *gin.Context) {
-		buses := mgr.GetBuses()
+		buses := s.TelematicsMgr.GetBuses()
 		c.JSON(200, buses)
 	})
 
 	r.GET("/get_session", func(c *gin.Context) {
 		if trackingId, ok := c.Params.Get("session_id"); ok {
-			c.JSON(200, trs.GetResponse(trackingId))
+			c.JSON(200, s.TrackingService.GetResponse(trackingId))
 		} else {
 			c.JSON(404, "server error session_id not found")
 		}
 	})
 
 	r.POST("/request_ride", func(c *gin.Context) {
-		if fromStop, ok := c.Params.Get("from_stop"); ok {
+		var rideReq processing.UserRequest
 
+		if err := c.ShouldBindJSON(&rideReq); err != nil {
+			c.JSON(400, gin.H{"error": "Invalid request body"})
+			return
 		}
 
-		if toStop, ok := c.Params.Get("to_stop"); ok {
-
-		}
-		req := processing.UserRequest{
-			FromCoords: fromStop,
-			ToCoords:   toStop,
-		}
-		resp := req.ProcessReq(mgr, sm, trs)
+		resp := s.ProcessReq(rideReq)
 
 		if resp.Ok {
 			c.JSON(200, resp.TrackingID)
 		} else {
-			c.JSON(414, "An error occured")
+			c.JSON(414, "An error occurred")
 		}
-
 	})
 
 	err := r.Run(":8000")
@@ -125,7 +117,7 @@ func main() {
 
 func updateWorker() {
 	for {
-		mgr.UpdateAll()
+		s.TelematicsMgr.UpdateAll()
 		time.Sleep(time.Second)
 	}
 }
