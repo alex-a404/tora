@@ -13,3 +13,9 @@ func (m *Manager) UpdateAll() {
 		m.Buses[i].Update()
 	}
 }
+
+func NewManager(buses []Bus) *Manager {
+	return &Manager{
+		Buses: buses,
+	}
+}

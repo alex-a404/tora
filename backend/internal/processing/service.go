@@ -13,9 +13,9 @@ import (
 )
 
 type Service struct {
-	TelematicsMgr   telematics.Manager
-	StopManifest    telematics.StopManifest
-	TrackingService tracker.TrackingService
+	TelematicsMgr   *telematics.Manager
+	StopManifest    *telematics.StopManifest
+	TrackingService *tracker.TrackingService
 }
 
 // ProcessReq interacts with python data abstraction layer

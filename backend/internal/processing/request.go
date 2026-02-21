@@ -14,10 +14,3 @@ type UserResponse struct {
 	Message    string
 	TrackingID string
 }
-
-func NewUserRequest(fromCoords, toCoords telematics.Coordinates) UserRequest {
-	return UserRequest{
-		FromCoords: fromCoords,
-		ToCoords:   toCoords,
-	}
-}

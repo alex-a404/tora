@@ -6,9 +6,9 @@ type Coordinates struct {
 }
 
 type Stop struct {
-	Name   string `json:"name"`
-	Coords Coordinates
-	Id     int32 `json:"id"`
+	Name   string      `json:"name"`
+	Coords Coordinates `json:"coords"`
+	Id     int32       `json:"id"`
 }
 
 // RouteDependency a rule that stop From should come before stop To in an itinerary
@@ -29,9 +29,10 @@ type Bus struct {
 func NewBus(name string, initialTransfers RouteDependency, pos Coordinates) (*Bus, error) {
 
 	b := &Bus{
-		Name:      name,
-		Itinerary: []Stop{initialTransfers.From, initialTransfers.To},
-		Pos:       pos,
+		Name:         name,
+		Dependencies: []RouteDependency{initialTransfers},
+		Itinerary:    []Stop{initialTransfers.From, initialTransfers.To},
+		Pos:          pos,
 	}
 
 	// calculate initial route

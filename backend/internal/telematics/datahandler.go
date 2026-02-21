@@ -1,6 +1,10 @@
 package telematics
 
-import "math"
+import (
+	"encoding/json"
+	"math"
+	"os"
+)
 
 type StopManifest struct {
 	Stops []Stop
@@ -40,6 +44,19 @@ func FindNearestStop(
 	return bestStop, true
 }
 
-func NewStopManifest_FromYaml(yaml []byte) (*StopManifest, error) {
+func NewStopManifestFromJson(data []byte) (*StopManifest, error) {
+	var manifest StopManifest
+	if err := json.Unmarshal(data, &manifest); err != nil {
+		return nil, err
+	}
+	return &manifest, nil
+}
 
+func NewStopManifestFromFile(path string) (*StopManifest, error) {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return nil, err
+	}
+
+	return NewStopManifestFromJson(data)
 }

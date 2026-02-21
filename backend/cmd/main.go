@@ -67,9 +67,14 @@ func routeSetup() {
 		log.Fatal(err)
 	}
 
-	s.TelematicsMgr = telematics.Manager{
-		Buses: []telematics.Bus{*busS1, *busS2, *busS3, *busS4},
+	s.TelematicsMgr = telematics.NewManager([]telematics.Bus{*busS1, *busS2, *busS3, *busS4})
+
+	manifest, err := telematics.NewStopManifestFromFile("data/stops.json")
+	if err != nil {
+		//	logger.Fatalf(err.Error())
 	}
+
+	s.StopManifest = manifest
 }
 
 func main() {
