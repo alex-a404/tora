@@ -3,7 +3,7 @@ package tracker
 import "tora/backend/internal/telematics"
 
 type TrackingSession struct {
-	Id       int
+	Id       string
 	FromStop telematics.Stop
 	ToStop   telematics.Stop
 	Bus      telematics.Bus

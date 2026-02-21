@@ -3,7 +3,7 @@ package tracker
 import "tora/backend/internal/telematics"
 
 type TrackingService struct {
-	ActiveSessions map[int]TrackingSession
+	ActiveSessions map[string]TrackingSession
 }
 
 func (t TrackingService) RegisterSession(session TrackingSession) {
@@ -14,7 +14,7 @@ func (t TrackingService) UnregisterSession(session TrackingSession) {
 	delete(t.ActiveSessions, session.Id)
 }
 
-func (t TrackingService) GetSession(sessionId int) TrackingSession {
+func (t TrackingService) GetSession(sessionId string) TrackingSession {
 	return t.ActiveSessions[sessionId]
 }
 
@@ -29,7 +29,7 @@ type TrackingSessionResponse struct {
 	ETA            int                    `json:"eta"`
 }
 
-func (t TrackingService) GetResponse(sessionId int) TrackingSessionResponse {
+func (t TrackingService) GetResponse(sessionId string) TrackingSessionResponse {
 	tsession := t.GetSession(sessionId)
 	// todo implement ETA
 	return TrackingSessionResponse{

@@ -7,6 +7,7 @@ import (
 	"tora/backend/internal/telematics"
 	"tora/backend/internal/tracker"
 
+	"github.com/google/uuid"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
@@ -101,31 +102,33 @@ func (req UserRequest) ProcessReq(
 		return fail("Server-side error (update bus itinerary+reroute)")
 	}
 
-	// todo init and register tracking session
+	// generate random uuid
+	reqUuid := uuid.NewString()
+
+	trs.RegisterSession(tracker.TrackingSession{
+		Id:       reqUuid,
+		FromStop: *fromStop,
+		ToStop:   *toStop,
+		Bus:      bus,
+	})
 
 	return UserResponse{
 		Ok:         true,
-		FromStopId: int(fromStop.Id),
-		ToStopId:   int(toStop.Id),
 		Message:    "OK",
-		TrackingID: 0,
+		TrackingID: reqUuid,
 	}
 }
 
 type UserResponse struct {
 	Ok         bool
-	FromStopId int
-	ToStopId   int
 	Message    string
-	TrackingID int
+	TrackingID string
 }
 
 func fail(msg string) UserResponse {
 	return UserResponse{
 		false,
-		0,
-		0,
 		msg,
-		0,
+		"",
 	}
 }
