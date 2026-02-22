@@ -7,7 +7,7 @@ import (
 )
 
 type StopManifest struct {
-	Stops []Stop
+	Stops []Stop `json:"stops"`
 }
 
 func (sm StopManifest) GetStopFromId(id int32) (*Stop, bool) {

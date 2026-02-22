@@ -7,6 +7,7 @@ import (
 	"tora/backend/internal/telematics"
 	"tora/backend/internal/tracker"
 
+	"github.com/bytedance/gopkg/util/logger"
 	"github.com/google/uuid"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -32,6 +33,7 @@ func (s *Service) ProcessReq(req UserRequest) UserResponse {
 		return fail("Server-side error (finding closest stop TO)")
 	}
 
+	logger.Infof("Assigned stop FROM %s TO %s", fromStop.Name, toStop.Name)
 	// TODO find closest bus to FROM
 	bus := s.TelematicsMgr.GetBuses()[0]
 
@@ -46,6 +48,7 @@ func (s *Service) ProcessReq(req UserRequest) UserResponse {
 	defer conn.Close()
 
 	client := pb.NewOptimizationClient(conn)
+	logger.Infof("Init Optimization client")
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -78,6 +81,8 @@ func (s *Service) ProcessReq(req UserRequest) UserResponse {
 		Direction:   1,
 	})
 	if err != nil {
+		logger.Infof("Bus itinerary: %s", bus.Itinerary)
+		logger.Infof("Bus constraints: %s", bus.Dependencies)
 		return fail("Server-side error (optimizing route gRPC call)")
 	}
 

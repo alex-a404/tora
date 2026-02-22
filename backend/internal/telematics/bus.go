@@ -1,5 +1,7 @@
 package telematics
 
+import "github.com/bytedance/gopkg/util/logger"
+
 type Coordinates struct {
 	Lat float64 `json:"lat"`
 	Lon float64 `json:"lon"`
@@ -43,6 +45,7 @@ func NewBus(name string, initialTransfers RouteDependency, pos Coordinates) (*Bu
 }
 
 func (b *Bus) NewItinerary(itinerary []Stop) error {
+	logger.Infof("New Itinerary for bus %s", b.Name)
 	b.Itinerary = itinerary
 	err := b.CalculateRoute()
 	if err != nil {
