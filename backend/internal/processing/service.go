@@ -99,11 +99,11 @@ func (s *Service) ProcessReq(req UserRequest) UserResponse {
 	// generate random uuid
 	reqUuid := uuid.NewString()
 
-	s.TrackingService.RegisterSession(tracker.TrackingSession{
+	s.TrackingService.RegisterSession(&tracker.TrackingSession{
 		Id:       reqUuid,
 		FromStop: *fromStop,
 		ToStop:   *toStop,
-		Bus:      *bus,
+		Bus:      bus,
 	})
 
 	return UserResponse{

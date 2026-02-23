@@ -3,24 +3,24 @@ package tracker
 import "tora/backend/internal/telematics"
 
 type TrackingService struct {
-	ActiveSessions map[string]TrackingSession
+	ActiveSessions map[string]*TrackingSession
 }
 
 func NewTrackingService() *TrackingService {
 	return &TrackingService{
-		ActiveSessions: make(map[string]TrackingSession),
+		ActiveSessions: make(map[string]*TrackingSession),
 	}
 }
 
-func (t TrackingService) RegisterSession(session TrackingSession) {
+func (t TrackingService) RegisterSession(session *TrackingSession) {
 	t.ActiveSessions[session.Id] = session
 }
 
-func (t TrackingService) UnregisterSession(session TrackingSession) {
+func (t TrackingService) UnregisterSession(session *TrackingSession) {
 	delete(t.ActiveSessions, session.Id)
 }
 
-func (t TrackingService) GetSession(sessionId string) (TrackingSession, bool) {
+func (t TrackingService) GetSession(sessionId string) (*TrackingSession, bool) {
 	session, ok := t.ActiveSessions[sessionId]
 	return session, ok
 }

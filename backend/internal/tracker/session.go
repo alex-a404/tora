@@ -6,5 +6,5 @@ type TrackingSession struct {
 	Id       string
 	FromStop telematics.Stop
 	ToStop   telematics.Stop
-	Bus      telematics.Bus
+	Bus      *telematics.Bus
 }
