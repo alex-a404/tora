@@ -26,6 +26,7 @@ type OptimizeRequest struct {
 	Itinerary     []int32                `protobuf:"varint,1,rep,packed,name=itinerary,proto3" json:"itinerary,omitempty"`
 	Constraints   []*RouteDependency     `protobuf:"bytes,2,rep,name=constraints,proto3" json:"constraints,omitempty"`
 	Direction     int32                  `protobuf:"varint,3,opt,name=direction,proto3" json:"direction,omitempty"`
+	NewRequest    *RouteDependency       `protobuf:"bytes,4,opt,name=newRequest,proto3" json:"newRequest,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -79,6 +80,13 @@ func (x *OptimizeRequest) GetDirection() int32 {
 		return x.Direction
 	}
 	return 0
+}
+
+func (x *OptimizeRequest) GetNewRequest() *RouteDependency {
+	if x != nil {
+		return x.NewRequest
+	}
+	return nil
 }
 
 type OptimizedRoute struct {
@@ -189,11 +197,14 @@ var File_optimization_proto protoreflect.FileDescriptor
 
 const file_optimization_proto_rawDesc = "" +
 	"\n" +
-	"\x12optimization.proto\x12\foptimization\"\x8e\x01\n" +
+	"\x12optimization.proto\x12\foptimization\"\xcd\x01\n" +
 	"\x0fOptimizeRequest\x12\x1c\n" +
 	"\titinerary\x18\x01 \x03(\x05R\titinerary\x12?\n" +
 	"\vconstraints\x18\x02 \x03(\v2\x1d.optimization.RouteDependencyR\vconstraints\x12\x1c\n" +
-	"\tdirection\x18\x03 \x01(\x05R\tdirection\"@\n" +
+	"\tdirection\x18\x03 \x01(\x05R\tdirection\x12=\n" +
+	"\n" +
+	"newRequest\x18\x04 \x01(\v2\x1d.optimization.RouteDependencyR\n" +
+	"newRequest\"@\n" +
 	"\x0eOptimizedRoute\x12\x14\n" +
 	"\x05stops\x18\x01 \x03(\x05R\x05stops\x12\x18\n" +
 	"\asuccess\x18\x02 \x01(\bR\asuccess\"5\n" +
@@ -223,13 +234,14 @@ var file_optimization_proto_goTypes = []any{
 }
 var file_optimization_proto_depIdxs = []int32{
 	2, // 0: optimization.OptimizeRequest.constraints:type_name -> optimization.RouteDependency
-	0, // 1: optimization.Optimization.RouteOptimize:input_type -> optimization.OptimizeRequest
-	1, // 2: optimization.Optimization.RouteOptimize:output_type -> optimization.OptimizedRoute
-	2, // [2:3] is the sub-list for method output_type
-	1, // [1:2] is the sub-list for method input_type
-	1, // [1:1] is the sub-list for extension type_name
-	1, // [1:1] is the sub-list for extension extendee
-	0, // [0:1] is the sub-list for field type_name
+	2, // 1: optimization.OptimizeRequest.newRequest:type_name -> optimization.RouteDependency
+	0, // 2: optimization.Optimization.RouteOptimize:input_type -> optimization.OptimizeRequest
+	1, // 3: optimization.Optimization.RouteOptimize:output_type -> optimization.OptimizedRoute
+	3, // [3:4] is the sub-list for method output_type
+	2, // [2:3] is the sub-list for method input_type
+	2, // [2:2] is the sub-list for extension type_name
+	2, // [2:2] is the sub-list for extension extendee
+	0, // [0:2] is the sub-list for field type_name
 }
 
 func init() { file_optimization_proto_init() }

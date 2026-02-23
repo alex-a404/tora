@@ -6,6 +6,12 @@ type TrackingService struct {
 	ActiveSessions map[string]TrackingSession
 }
 
+func NewTrackingService() *TrackingService {
+	return &TrackingService{
+		ActiveSessions: make(map[string]TrackingSession),
+	}
+}
+
 func (t TrackingService) RegisterSession(session TrackingSession) {
 	t.ActiveSessions[session.Id] = session
 }
@@ -14,8 +20,9 @@ func (t TrackingService) UnregisterSession(session TrackingSession) {
 	delete(t.ActiveSessions, session.Id)
 }
 
-func (t TrackingService) GetSession(sessionId string) TrackingSession {
-	return t.ActiveSessions[sessionId]
+func (t TrackingService) GetSession(sessionId string) (TrackingSession, bool) {
+	session, ok := t.ActiveSessions[sessionId]
+	return session, ok
 }
 
 // TrackingSessionResponse intended to be communicated to client via REST/websockets ...
@@ -30,15 +37,27 @@ type TrackingSessionResponse struct {
 }
 
 func (t TrackingService) GetResponse(sessionId string) TrackingSessionResponse {
-	tsession := t.GetSession(sessionId)
-	// todo implement ETA
+	if tsession, ok := t.GetSession(sessionId); ok {
+		// todo implement ETA
+		return TrackingSessionResponse{
+			BusId:          tsession.Bus.Name,
+			FromStopCoords: tsession.FromStop.Coords,
+			ToStopCoords:   tsession.ToStop.Coords,
+			FromStopName:   tsession.FromStop.Name,
+			ToStopName:     tsession.ToStop.Name,
+			BusCoords:      tsession.Bus.Pos,
+			ETA:            0,
+		}
+	}
+
 	return TrackingSessionResponse{
-		BusId:          tsession.Bus.Name,
-		FromStopCoords: tsession.FromStop.Coords,
-		ToStopCoords:   tsession.ToStop.Coords,
-		FromStopName:   tsession.FromStop.Name,
-		ToStopName:     tsession.ToStop.Name,
-		BusCoords:      tsession.Bus.Pos,
+		BusId:          "",
+		FromStopCoords: telematics.Coordinates{},
+		ToStopCoords:   telematics.Coordinates{},
+		FromStopName:   "",
+		ToStopName:     "",
+		BusCoords:      telematics.Coordinates{},
 		ETA:            0,
 	}
+
 }

@@ -1,10 +1,10 @@
 package telematics
 
 type Manager struct {
-	Buses []Bus
+	Buses []*Bus
 }
 
-func (m *Manager) GetBuses() []Bus {
+func (m *Manager) GetBuses() []*Bus {
 	return m.Buses
 }
 
@@ -14,7 +14,7 @@ func (m *Manager) UpdateAll() {
 	}
 }
 
-func NewManager(buses []Bus) *Manager {
+func NewManager(buses []*Bus) *Manager {
 	return &Manager{
 		Buses: buses,
 	}

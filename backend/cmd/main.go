@@ -5,6 +5,7 @@ import (
 	"time"
 	"tora/backend/internal/processing"
 	"tora/backend/internal/telematics"
+	"tora/backend/internal/tracker"
 
 	"github.com/bytedance/gopkg/util/logger"
 	"github.com/gin-contrib/cors"
@@ -23,11 +24,11 @@ func routeSetup() {
 	}
 	s.StopManifest = manifest
 
-	EleftheriaStop, _ := s.StopManifest.GetStopFromId(581)
-	S1EndStop, _ := s.StopManifest.GetStopFromId(248)
-	S2EndStop, _ := s.StopManifest.GetStopFromId(297)
-	S3EndStop, _ := s.StopManifest.GetStopFromId(377)
-	S4EndStop, _ := s.StopManifest.GetStopFromId(1216)
+	EleftheriaStop, _ := s.StopManifest.GetStopFromId(818)
+	S1EndStop, _ := s.StopManifest.GetStopFromId(687) // Ave. Archiepiskopou Makariou C - Kallitheas
+	S2EndStop, _ := s.StopManifest.GetStopFromId(713) // Ave. Tseriou - Paragogikotitas 2
+	S3EndStop, _ := s.StopManifest.GetStopFromId(762) // Ave. Makedonias - Tseriou
+	S4EndStop, _ := s.StopManifest.GetStopFromId(261) // Ave. Athalassas - Konstantinou Giallourou
 
 	// setup buses
 	busS1, err := telematics.NewBus(
@@ -82,7 +83,9 @@ func routeSetup() {
 		log.Fatal(err)
 	}
 
-	s.TelematicsMgr = telematics.NewManager([]telematics.Bus{*busS1, *busS2, *busS3, *busS4})
+	s.TrackingService = tracker.NewTrackingService()
+
+	s.TelematicsMgr = telematics.NewManager([]*telematics.Bus{busS1, busS2, busS3, busS4})
 	logger.Infof("Inital stops loaded, buses initialised.")
 }
 
@@ -107,7 +110,7 @@ func main() {
 		c.JSON(200, buses)
 	})
 
-	r.GET("/get_session", func(c *gin.Context) {
+	r.GET("/get_session/:session_id", func(c *gin.Context) {
 		if trackingId, ok := c.Params.Get("session_id"); ok {
 			c.JSON(200, s.TrackingService.GetResponse(trackingId))
 		} else {
@@ -126,9 +129,9 @@ func main() {
 		resp := s.ProcessReq(rideReq)
 
 		if resp.Ok {
-			c.JSON(200, resp.TrackingID)
+			c.JSON(200, resp)
 		} else {
-			c.JSON(414, resp.Message)
+			c.JSON(414, resp)
 		}
 	})
 
@@ -142,6 +145,7 @@ func main() {
 func updateWorker() {
 	for {
 		s.TelematicsMgr.UpdateAll()
+		//logger.Infof("%s", s.TelematicsMgr.GetBuses()[0].Itinerary)
 		time.Sleep(time.Second)
 	}
 }

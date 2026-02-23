@@ -57,9 +57,6 @@ func (s *Service) ProcessReq(req UserRequest) UserResponse {
 		itineraryList = append(itineraryList, stop.Id)
 	}
 
-	// add current request to itinerary
-	itineraryList = append(itineraryList, fromStop.Id, toStop.Id)
-
 	var constraintList []*pb.RouteDependency
 	for _, constraint := range bus.Dependencies {
 		dep := &pb.RouteDependency{
@@ -79,6 +76,7 @@ func (s *Service) ProcessReq(req UserRequest) UserResponse {
 		Itinerary:   itineraryList,
 		Constraints: constraintList,
 		Direction:   1,
+		NewRequest:  &pb.RouteDependency{From: fromStop.Id, To: toStop.Id},
 	})
 	if err != nil {
 		logger.Infof("Bus itinerary: %s", bus.Itinerary)
@@ -105,7 +103,7 @@ func (s *Service) ProcessReq(req UserRequest) UserResponse {
 		Id:       reqUuid,
 		FromStop: *fromStop,
 		ToStop:   *toStop,
-		Bus:      bus,
+		Bus:      *bus,
 	})
 
 	return UserResponse{
