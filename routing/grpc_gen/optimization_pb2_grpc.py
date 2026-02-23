@@ -41,7 +41,7 @@ class OptimizationStub(object):
                 _registered_method=True)
 
 
-class  OptimizationServicer(object):
+class OptimizationServicer(object):
     """Missing associated documentation comment in .proto file."""
 
     def RouteOptimize(self, request, context):

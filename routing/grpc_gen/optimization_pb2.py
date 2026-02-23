@@ -24,7 +24,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x12optimization.proto\x12\x0coptimization\"k\n\x0fOptimizeRequest\x12\x11\n\titinerary\x18\x01 \x03(\x05\x12\x32\n\x0b\x63onstraints\x18\x02 \x03(\x0b\x32\x1d.optimization.RouteDependency\x12\x11\n\tdirection\x18\x03 \x01(\x05\"0\n\x0eOptimizedRoute\x12\r\n\x05stops\x18\x01 \x03(\x05\x12\x0f\n\x07success\x18\x02 \x01(\x08\"+\n\x0fRouteDependency\x12\x0c\n\x04\x46rom\x18\x01 \x01(\x05\x12\n\n\x02To\x18\x02 \x01(\x05\x32\\\n\x0cOptimization\x12L\n\rRouteOptimize\x12\x1d.optimization.OptimizeRequest\x1a\x1c.optimization.OptimizedRouteB4Z2github.com/alex-a404/tora/backend/gen;optimizationb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x12optimization.proto\x12\x0coptimization\"\x9e\x01\n\x0fOptimizeRequest\x12\x11\n\titinerary\x18\x01 \x03(\x05\x12\x32\n\x0b\x63onstraints\x18\x02 \x03(\x0b\x32\x1d.optimization.RouteDependency\x12\x11\n\tdirection\x18\x03 \x01(\x05\x12\x31\n\nnewRequest\x18\x04 \x01(\x0b\x32\x1d.optimization.RouteDependency\"0\n\x0eOptimizedRoute\x12\r\n\x05stops\x18\x01 \x03(\x05\x12\x0f\n\x07success\x18\x02 \x01(\x08\"+\n\x0fRouteDependency\x12\x0c\n\x04\x46rom\x18\x01 \x01(\x05\x12\n\n\x02To\x18\x02 \x01(\x05\x32\\\n\x0cOptimization\x12L\n\rRouteOptimize\x12\x1d.optimization.OptimizeRequest\x1a\x1c.optimization.OptimizedRouteB4Z2github.com/alex-a404/tora/backend/gen;optimizationb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -32,12 +32,12 @@ _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'optimization_pb2', _globals
 if not _descriptor._USE_C_DESCRIPTORS:
   _globals['DESCRIPTOR']._loaded_options = None
   _globals['DESCRIPTOR']._serialized_options = b'Z2github.com/alex-a404/tora/backend/gen;optimization'
-  _globals['_OPTIMIZEREQUEST']._serialized_start=36
-  _globals['_OPTIMIZEREQUEST']._serialized_end=143
-  _globals['_OPTIMIZEDROUTE']._serialized_start=145
-  _globals['_OPTIMIZEDROUTE']._serialized_end=193
-  _globals['_ROUTEDEPENDENCY']._serialized_start=195
-  _globals['_ROUTEDEPENDENCY']._serialized_end=238
-  _globals['_OPTIMIZATION']._serialized_start=240
-  _globals['_OPTIMIZATION']._serialized_end=332
+  _globals['_OPTIMIZEREQUEST']._serialized_start=37
+  _globals['_OPTIMIZEREQUEST']._serialized_end=195
+  _globals['_OPTIMIZEDROUTE']._serialized_start=197
+  _globals['_OPTIMIZEDROUTE']._serialized_end=245
+  _globals['_ROUTEDEPENDENCY']._serialized_start=247
+  _globals['_ROUTEDEPENDENCY']._serialized_end=290
+  _globals['_OPTIMIZATION']._serialized_start=292
+  _globals['_OPTIMIZATION']._serialized_end=384
 # @@protoc_insertion_point(module_scope)

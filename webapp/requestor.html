@@ -1,200 +1,324 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Requestor App</title>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <title>Tora - Request Ride</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 
     <!-- Leaflet CSS -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+    <link rel="stylesheet"
+          href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+
+    <!-- Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap"
+          rel="stylesheet">
 
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
+        * { box-sizing: border-box; }
+
+        .topbar {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 18px 16px 12px;
+            display: flex;
+            justify-content: center;
+            z-index: 10;
+            pointer-events: none;
         }
 
-        header {
-            background-color: #808080ff;
+        .topbar-title {
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(10px);
             color: white;
-            padding: 15px;
-            text-align: center;
-            font-size: 24px;
+            font-size: 15px;
+            font-weight: 600;
+            padding: 10px 18px;
+            border-radius: 999px;
+            letter-spacing: 0.4px;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
+            background: #000;
         }
 
         #map {
-            width: 80%;
-            height: 500px;
-            margin: 20px auto;
-            border: 2px solid #808080ff;
-            border-radius: 10px;
+            position: fixed;
+            inset: 0;
+            z-index: 1;
+        }
+
+        .panel {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background: white;
+            border-radius: 24px 24px 0 0;
+            padding: 20px;
+            box-shadow: 0 -10px 30px rgba(0,0,0,0.25);
+            z-index: 5;
+        }
+
+        .drag {
+            width: 40px;
+            height: 4px;
+            background: #d1d5db;
+            border-radius: 4px;
+            margin: 0 auto 15px;
+        }
+
+        .title {
+            font-size: 15px;
+            color: #6b7280;
+            margin-bottom: 10px;
+        }
+
+        .card {
+            background: #f3f4f6;
+            padding: 14px;
+            border-radius: 14px;
+            font-size: 14px;
+            line-height: 1.5;
         }
 
         button {
+            width: 100%;
+            margin-top: 15px;
+            padding: 14px;
+            border-radius: 14px;
+            border: none;
+            font-size: 16px;
+            font-weight: 600;
+            background: #111827;
+            color: white;
             cursor: pointer;
+        }
+
+        button:disabled {
+            background: #9ca3af;
+        }
+
+        .success {
+            background: #ecfdf5;
+            color: #065f46;
+            padding: 14px;
+            border-radius: 14px;
+            margin-top: 12px;
+            font-size: 14px;
+        }
+
+        .hidden { display: none; }
+
+        .reset {
+            position: fixed;
+            right: 15px;
+            bottom: 160px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: white;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            cursor: pointer;
+            z-index: 6;
         }
     </style>
 </head>
 <body>
-    <header>Request Bus - Tora for Nicosia</header>
-    <p id="statusfield"></p>
-    <div id="map"></div>
 
-    <!-- Leaflet JS -->
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script>
-        // ----- MAP SETUP -----
-        var map = L.map('map').setView([35.185, 33.382], 13);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '© OpenStreetMap'
-        }).addTo(map);
+<div class="topbar">
+    <div class="topbar-title">
+        Tora for Nicosia • Request a bus ride
+    </div>
+</div>
 
-        map.doubleClickZoom.disable();
+<div id="map"></div>
 
-        const statusField = document.getElementById("statusfield");
+<div class="panel">
+    <div class="drag"></div>
+    <div id="statusText" class="title">
+        Tap map to select pickup
+    </div>
 
-        // ----- STATES -----
-        const STATE_ORIGIN = "ORIGIN";
-        const STATE_DEST = "DESTINATION";
-        const STATE_READY = "READY";
-        const STATE_INFO = "INFO";
+    <div id="infoBox" class="card hidden"></div>
 
-        let state = STATE_ORIGIN;
-        let originMarker = null;
-        let destMarker = null;
-        let originLatLng = null;
-        let destLatLng = null;
-        let requestButton = null;
-        let busPollingInterval = null;
-        let busRouteLine = null;
-        let busMarker = null;
+    <button id="actionBtn" class="hidden">
+        Request Ride
+    </button>
 
-        updateStatus();
+    <div id="trackingBox"></div>
+</div>
 
-        // ----- MAP DOUBLE CLICK HANDLER -----
-        map.on("dblclick", function(e) {
-            if (state === STATE_ORIGIN) {
-                originLatLng = e.latlng;
-                originMarker = L.marker(originLatLng).addTo(map)
-                    .bindPopup("Origin")
-                    .openPopup();
-                state = STATE_DEST;
-                updateStatus();
-                return;
-            }
+<div id="resetBtn" class="reset hidden">↺</div>
 
-            if (state === STATE_DEST) {
-                destLatLng = e.latlng;
-                destMarker = L.marker(destLatLng).addTo(map)
-                    .bindPopup("Destination")
-                    .openPopup();
-                state = STATE_READY;
-                updateStatus();
-                showRequestButton();
-                return;
-            }
+<!-- Leaflet JS (MUST be before your script) -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+    const map = L.map('map').setView([35.185, 33.382], 13);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: ''
+    }).addTo(map);
+
+    const STATE_PICKUP = 0;
+    const STATE_DEST = 1;
+    const STATE_READY = 2;
+    const STATE_TRACKING = 3;
+
+    let state = STATE_PICKUP;
+
+    let pickup = null;
+    let dropoff = null;
+    let pickupMarker = null;
+    let dropoffMarker = null;
+    let busMarker = null;
+    let stopLine = null;
+
+    let trackingId = null;
+    let poller = null;
+
+    const statusText = document.getElementById("statusText");
+    const infoBox = document.getElementById("infoBox");
+    const actionBtn = document.getElementById("actionBtn");
+    const trackingBox = document.getElementById("trackingBox");
+    const resetBtn = document.getElementById("resetBtn");
+
+    map.on("click", (e) => {
+
+        if (state === STATE_PICKUP) {
+            pickup = e.latlng;
+            pickupMarker = L.circleMarker(pickup, {
+                radius: 8,
+                color: "#111827",
+                fillColor: "#111827",
+                fillOpacity: 1
+            }).addTo(map);
+
+            statusText.innerText = "Tap map to select destination";
+            state = STATE_DEST;
+            return;
+        }
+
+        if (state === STATE_DEST) {
+            dropoff = e.latlng;
+            dropoffMarker = L.circleMarker(dropoff, {
+                radius: 8,
+                color: "#10b981",
+                fillColor: "#10b981",
+                fillOpacity: 1
+            }).addTo(map);
+
+            infoBox.innerHTML = `
+                <strong>Pickup:</strong><br>
+                ${pickup.lat.toFixed(5)}, ${pickup.lng.toFixed(5)}<br><br>
+                <strong>Dropoff:</strong><br>
+                ${dropoff.lat.toFixed(5)}, ${dropoff.lng.toFixed(5)}
+            `;
+
+            infoBox.classList.remove("hidden");
+            actionBtn.classList.remove("hidden");
+            resetBtn.classList.remove("hidden");
+
+            statusText.innerText = "Confirm your ride";
+            state = STATE_READY;
+        }
+    });
+
+    actionBtn.onclick = async () => {
+
+        actionBtn.innerText = "Requesting...";
+        actionBtn.disabled = true;
+
+        const response = await fetch("http://127.0.0.1:8000/request_ride", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                from: { lat: pickup.lat, lon: pickup.lng },
+                to: { lat: dropoff.lat, lon: dropoff.lng }
+            })
         });
 
-        // ----- SHOW REQUEST BUTTON -----
-        function showRequestButton() {
-            requestButton = document.createElement("button");
-            requestButton.innerText = "Request Ride";
-            requestButton.style.display = "block";
-            requestButton.style.margin = "10px auto";
-            requestButton.style.padding = "10px 20px";
-            requestButton.style.fontSize = "16px";
+        const data = await response.json();
 
-            requestButton.onclick = requestRide;
-            document.body.insertBefore(requestButton, document.getElementById("map"));
+        if (!data.Ok) {
+            statusText.innerText = "Request failed";
+            return;
         }
 
-        // ----- REQUEST RIDE -----
-        async function requestRide() {
-            // remove origin/destination markers
-            if (originMarker) map.removeLayer(originMarker);
-            if (destMarker) map.removeLayer(destMarker);
+        trackingId = data.TrackingID;
+        state = STATE_TRACKING;
 
-            originMarker = null;
-            destMarker = null;
+        infoBox.classList.add("hidden");
+        actionBtn.classList.add("hidden");
 
-            if (requestButton) requestButton.remove();
-            requestButton = null;
+        statusText.innerText = "Bus assigned. Tracking...";
 
-            state = STATE_INFO;
-            updateStatus("Requesting bus...");
+        startPolling();
+    };
 
-            const originStr = `${originLatLng.lat},${originLatLng.lng}`;
-            const destStr = `${destLatLng.lat},${destLatLng.lng}`;
+    function startPolling() {
+        fetchSession();
+        poller = setInterval(fetchSession, 4000);
+    }
 
-            try {
-                // Step 1: call request_transfer
-                const transferResp = await fetch(
-                    `http://127.0.0.1:8000/request_transfer?origin_str=${originStr}&dest_str=${destStr}`
-                );
-                const stopId = (await transferResp.text()).trim(); // e.g., "S4-21"
-                const busId = stopId.split("-")[0];                 // "S4"
+    async function fetchSession() {
 
-                statusField.innerText = `Bus ${busId} assigned. Tracking...`;
+        const response = await fetch(`http://127.0.0.1:8000/get_session/${trackingId}`);
+        const data = await response.json();
 
-                // Step 2: start polling get_buses every 3 seconds
-                if (busPollingInterval) clearInterval(busPollingInterval);
-                busPollingInterval = setInterval(() => pollBus(busId, stopId, originStr, destStr), 3000);
+        updateTracking(data);
+    }
 
-            } catch (err) {
-                statusField.innerText = "Error requesting bus";
-                console.error(err);
-            }
+    function updateTracking(data) {
+
+        const busPos = [data.bus_coords.lat, data.bus_coords.lon];
+        const fromStop = [data.from_stop_coords.lat, data.from_stop_coords.lon];
+        const toStop = [data.to_stop_coords.lat, data.to_stop_coords.lon];
+
+        if (!busMarker) {
+            const busIcon = L.icon({
+                iconUrl: "https://cdn.jsdelivr.net/npm/@mdi/svg/svg/bus.svg",
+                iconSize: [42, 42],
+                iconAnchor: [21, 21]
+            });
+
+            busMarker = L.marker(busPos, { icon: busIcon }).addTo(map);
+
+            stopLine = L.polyline([fromStop, toStop], {
+                color: "#9ca3af",
+                weight: 4,
+                dashArray: "6 6"
+            }).addTo(map);
+
+            map.fitBounds(L.featureGroup([busMarker]).getBounds().pad(0.5));
+        } else {
+            busMarker.setLatLng(busPos);
         }
 
-        // ----- POLL BUS INFO -----
-        async function pollBus(busId, stopId, origin, destination) {
-            try {
-                const busesResp = await fetch("http://127.0.0.1:8000/get_buses");
-                const buses = await busesResp.json();
+        trackingBox.innerHTML = `
+            <div class="success">
+                <strong>Bus:</strong> ${data.bus_id}<br><br>
+                <strong>Pickup Stop:</strong><br>
+                ${data.from_stop_name}<br><br>
+                <strong>Dropoff Stop:</strong><br>
+                ${data.to_stop_name}<br><br>
+                <strong>ETA:</strong> ${data.eta} min
+            </div>
+        `;
+    }
 
-                const bus = buses.find(b => b.name === busId);
-                if (!bus) return;
+    resetBtn.onclick = () => {
+        clearInterval(poller);
+        location.reload();
+    };
+</script>
 
-                // update status field
-                statusField.innerHTML = `
-                    <b>Bus:</b> ${bus.name}<br>
-                    <b>Pickup Stop:</b> ${stopId}<br>
-                    <b>Origin:</b> ${origin}<br>
-                    <b>Destination:</b> ${destination}<br>
-                    <b>Route points:</b> ${bus.route.length}<br>
-                    <b>Current Position:</b> ${bus.pos[0].toFixed(5)}, ${bus.pos[1].toFixed(5)}
-                `;
-
-                // remove old route/marker
-                if (busRouteLine) map.removeLayer(busRouteLine);
-                if (busMarker) map.removeLayer(busMarker);
-
-                // draw telematics route
-                const latlngs = bus.route.map(pt => [pt[0], pt[1]]);
-                busRouteLine = L.polyline(latlngs, { color: 'blue' }).addTo(map);
-
-                // draw current telematics position
-                busMarker = L.circleMarker(bus.pos, { radius: 7, color: 'red' }).addTo(map);
-
-            } catch (err) {
-                console.error("Error polling bus:", err);
-            }
-        }
-
-        // ----- UPDATE STATUS -----
-        function updateStatus(text=null) {
-            if (text) {
-                statusField.innerText = text;
-                return;
-            }
-            if (state === STATE_ORIGIN) statusField.innerText = "Double-click map to select origin";
-            else if (state === STATE_DEST) statusField.innerText = "Double-click map to select destination";
-            else if (state === STATE_READY) statusField.innerText = "Ready to request bus";
-            else if (state === STATE_INFO) statusField.innerText = "Bus requested. Waiting for info…";
-        }
-
-    </script>
 </body>
 </html>
-
