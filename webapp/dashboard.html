@@ -42,16 +42,17 @@
 
     <script>
         var map = L.map('map').setView([35.185, 33.382], 13);
-        
+
         const statusField = document.getElementById("statusfield");
 
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; OpenStreetMap contributors'
         }).addTo(map);
-    
+
         const busMarkers = {}; // store markers by telematics name
         const busRoutes = {};
-        
+        const busStops = {};
+
         async function fetchBusPositions() {
             try {
                 const response = await fetch('http://127.0.0.1:8000/get_buses'); // your endpoint
@@ -64,7 +65,7 @@
                 return [];
             }
         }
-        
+
 
         const busIcon = L.icon({
             iconUrl: 'https://cdn-icons-png.flaticon.com/512/1068/1068632.png',
@@ -77,24 +78,51 @@
             const buses = await fetchBusPositions();
 
             buses.forEach(bus => {
-                const { name, pos, route } = bus;
+                const { name, pos, route, itinerary } = bus;
 
                 // ----- marker -----
                 if (busMarkers[name]) {
                     busMarkers[name].setLatLng(pos);
                 } else {
                     busMarkers[name] = L.marker(pos, { icon: busIcon })
-                    .addTo(map)
-                    .bindPopup(name);
+                        .addTo(map)
+                        .bindPopup(name);
                 }
 
                 // ----- route -----
                 if (route && route.length > 1) {
                     if (busRoutes[name]) {
-                       busRoutes[name].setLatLngs(route);
+                        busRoutes[name].setLatLngs(route);
                     } else {
                         busRoutes[name] = L.polyline(route).addTo(map);
                     }
+                }
+
+                // ----- stops (itinerary) -----
+                if (itinerary && itinerary.length > 0) {
+
+                    // create container for this bus if not exists
+                    if (!busStops[name]) {
+                        busStops[name] = [];
+                    }
+
+                    itinerary.forEach((stop, index) => {
+
+                        const stopLatLng = {
+                            lat: stop.coords.lat,
+                            lng: stop.coords.lon
+                        };
+
+                        if (busStops[name][index]) {
+                            busStops[name][index].setLatLng(stopLatLng);
+                        } else {
+                            const stopMarker = L.marker(stopLatLng)
+                                .addTo(map)
+                                .bindPopup(name + " - Stop: " + stop.name);
+
+                            busStops[name][index] = stopMarker;
+                        }
+                    });
                 }
             });
         }
@@ -105,7 +133,7 @@
 
         // Update every 5 seconds
         setInterval(updateBuses, 5000);
-        
+
     </script>
 </body>
 </html>

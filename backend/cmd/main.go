@@ -145,7 +145,7 @@ func main() {
 func updateWorker() {
 	for {
 		s.TelematicsMgr.UpdateAll()
-		//logger.Infof("%s", s.TelematicsMgr.GetBuses()[0].Itinerary)
+		logger.Infof("%s", s.TelematicsMgr.GetBuses()[0].Itinerary)
 		time.Sleep(time.Second)
 	}
 }
